@@ -1,7 +1,10 @@
 package com.allen.mm.app;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -19,14 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -52,21 +51,6 @@ public class MainActivity extends ActionBarActivity {
         }
         density=getResources().getDisplayMetrics().density;
         Log.d("MainActivity","density="+density);
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(this)
-                .threadPoolSize(3)//线程池内加载的数量
-                .threadPriority(Thread.NORM_PRIORITY - 2)
-                .denyCacheImageMultipleSizesInMemory()
-                .memoryCacheSize(2 * 1024 * 1024)
-                .discCacheSize(50 * 1024 * 1024)
-                .discCacheFileNameGenerator(new Md5FileNameGenerator())//将保存的时候的URI名称用MD5 加密
-                .tasksProcessingOrder(QueueProcessingType.LIFO)
-                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
-                .imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000)) // connectTimeout (5 s), readTimeout (30 s)超时时间
-                .writeDebugLogs() // Remove for release app
-                .build();//开始构建
-        // Initialize ImageLoader with configuration.
-        ImageLoader.getInstance().init(config);
     }
 
     /**
@@ -238,7 +222,7 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onBindViewHolder(final ImageAdapter.Holder viewHolder, int i) {
-                Model model=list.get(i);
+                final Model model=list.get(i);
                 viewHolder.tv.setText(model.desc);
                 String imagUrl=density>=2?model.thumb_large_url:model.thumbnail_url;
                 ImageLoader.getInstance().loadImage(imagUrl,displayImageOptions, new ImageLoadingListener() {
@@ -249,7 +233,7 @@ public class MainActivity extends ActionBarActivity {
 
                     @Override
                     public void onLoadingFailed(String s, View view, FailReason failReason) {
-
+                        viewHolder.iv.setImageResource(R.drawable.empty_photo);
                     }
 
                     @Override
@@ -264,6 +248,20 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     public void onLoadingCancelled(String s, View view) {
 
+                    }
+                });
+
+                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int[] location = new int[2];
+                        v.getLocationOnScreen(location);
+                        int x = location[0];
+                        int y = location[1];
+                        Intent intent=new Intent(getActivity(),ImageActivity.class);
+                        intent.putExtra("model",model);
+                        ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
+                        ActivityCompat.startActivity(getActivity(),intent,optionsCompat.toBundle());
                     }
                 });
             }
