@@ -10,11 +10,14 @@ import android.os.Parcelable;
  */
 public class Model implements Parcelable {
     //头像
-    public String thumbnail_url;
-    public String thumb_large_url;
-    public String image_url;//大图
-    public String desc;//标题
+    public String thumbURL;
+    public String hoverURL;
+    public String objURL;//大图
+    public String setTittle;//标题
 
+
+    public Model() {
+    }
 
     @Override
     public int describeContents() {
@@ -23,23 +26,20 @@ public class Model implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.thumbnail_url);
-        dest.writeString(this.thumb_large_url);
-        dest.writeString(this.image_url);
-        dest.writeString(this.desc);
-    }
-
-    public Model() {
+        dest.writeString(this.thumbURL);
+        dest.writeString(this.hoverURL);
+        dest.writeString(this.objURL);
+        dest.writeString(this.setTittle);
     }
 
     private Model(Parcel in) {
-        this.thumbnail_url = in.readString();
-        this.thumb_large_url = in.readString();
-        this.image_url = in.readString();
-        this.desc = in.readString();
+        this.thumbURL = in.readString();
+        this.hoverURL = in.readString();
+        this.objURL = in.readString();
+        this.setTittle = in.readString();
     }
 
-    public static final Parcelable.Creator<Model> CREATOR = new Parcelable.Creator<Model>() {
+    public static final Creator<Model> CREATOR = new Creator<Model>() {
         public Model createFromParcel(Parcel source) {
             return new Model(source);
         }

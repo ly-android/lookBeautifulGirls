@@ -16,10 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -119,13 +116,26 @@ public class MainActivity extends ActionBarActivity {
             recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    switch (newState) {
+                        case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+                            ImageLoader.getInstance().resume();
+                            break;
+                        case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+                            ImageLoader.getInstance().pause();
+                            break;
+                        case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
+                            ImageLoader.getInstance().pause();
+                            break;
+                        default:
+                            break;
+                    }
                     //加载更多
                     int into[]=new int[2];
                     staggeredGridLayoutManager.findLastVisibleItemPositions(into);
                     if (!refreshLayout.isRefreshing()
                             && recyclerView.getAdapter().getItemCount() == Math.max(into[0],into[1])+1
                             && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        page++;
+                        page+=30;
                         getData();
                     }
                 }
@@ -183,7 +193,7 @@ public class MainActivity extends ActionBarActivity {
                     refreshLayout.setRefreshing(false);
                     if(response!=null){
                         try {
-                            JSONArray imags=response.getJSONArray("data");
+                            JSONArray imags=response.getJSONArray("imgs");
                             if(imags!=null){
                                 if(page==1){
                                     list.clear();
@@ -191,10 +201,10 @@ public class MainActivity extends ActionBarActivity {
                                 for (int i = 0; i < imags.length(); i++) {
                                     JSONObject object=imags.getJSONObject(i);
                                     Model model=new Model();
-                                    model.desc=object.getString("desc");
-                                    model.image_url=object.getString("image_url");
-                                    model.thumb_large_url=object.getString("thumb_large_url");
-                                    model.thumbnail_url=object.getString("thumbnail_url");
+                                    model.setTittle=object.getString("setTittle");
+                                    model.thumbURL=object.getString("thumbURL");
+                                    model.objURL=object.getString("objURL");
+                                    model.hoverURL=object.getString("hoverURL");
                                     list.add(model);
                                 }
                             }
@@ -223,8 +233,8 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onBindViewHolder(final ImageAdapter.Holder viewHolder, int i) {
                 final Model model=list.get(i);
-                viewHolder.tv.setText(model.desc);
-                String imagUrl=density>=2?model.thumb_large_url:model.thumbnail_url;
+                viewHolder.tv.setText(model.setTittle);
+                String imagUrl=density>=2?model.hoverURL:model.thumbURL;
                 ImageLoader.getInstance().loadImage(imagUrl,displayImageOptions, new ImageLoadingListener() {
                     @Override
                     public void onLoadingStarted(String s, View view) {
