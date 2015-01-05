@@ -1,5 +1,5 @@
 ##from it ,you can learn swipeRefreshLayout,recycleView,StaggeredGridLayoutManager<br/>
-##dependencies:
+##dependencies
             [nineoldandroids](https://github.com/JakeWharton/NineOldAndroids)
             [photoview](https://github.com/chrisbanes/PhotoView)
             [android-async-http](https://github.com/loopj/android-async-http)
