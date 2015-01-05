@@ -21,9 +21,7 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -193,7 +191,7 @@ public class MainActivity extends ActionBarActivity {
                     refreshLayout.setRefreshing(false);
                     if(response!=null){
                         try {
-                            JSONArray imags=response.getJSONArray("imgs");
+                            JSONArray imags=response.getJSONArray("data");
                             if(imags!=null){
                                 if(page==1){
                                     list.clear();
@@ -201,10 +199,14 @@ public class MainActivity extends ActionBarActivity {
                                 for (int i = 0; i < imags.length(); i++) {
                                     JSONObject object=imags.getJSONObject(i);
                                     Model model=new Model();
-                                    model.setTittle=object.getString("setTittle");
-                                    model.thumbURL=object.getString("thumbURL");
-                                    model.objURL=object.getString("objURL");
-                                    model.hoverURL=object.getString("hoverURL");
+                                    model.desc=object.getString("desc");
+                                    model.thumbnail_url=object.getString("thumbnail_url");
+                                    model.thumb_large_url=object.getString("thumb_large_url");
+                                    model.image_url=object.getString("image_url");
+                                    model.thumbnail_height=object.getInt("thumbnail_height");
+                                    model.thumbnail_width=object.getInt("thumbnail_width");
+                                    model.thumb_large_height=object.getInt("thumb_large_height");
+                                    model.thumb_large_width=object.getInt("thumb_large_width");
                                     list.add(model);
                                 }
                             }
@@ -233,33 +235,37 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onBindViewHolder(final ImageAdapter.Holder viewHolder, int i) {
                 final Model model=list.get(i);
-                viewHolder.tv.setText(model.setTittle);
-                String imagUrl=density>=2?model.hoverURL:model.thumbURL;
-                ImageLoader.getInstance().loadImage(imagUrl,displayImageOptions, new ImageLoadingListener() {
-                    @Override
-                    public void onLoadingStarted(String s, View view) {
-
-                    }
-
-                    @Override
-                    public void onLoadingFailed(String s, View view, FailReason failReason) {
-                        viewHolder.iv.setImageResource(R.drawable.empty_photo);
-                    }
-
-                    @Override
-                    public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-                        RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-                        params.height=bitmap.getHeight();
-//                        Log.e("MainActivity","height="+params.height);
-                        viewHolder.iv.setLayoutParams(params);
-                        viewHolder.iv.setImageBitmap(bitmap);
-                    }
-
-                    @Override
-                    public void onLoadingCancelled(String s, View view) {
-
-                    }
-                });
+                viewHolder.tv.setText(model.desc);
+                String imagUrl=density>=2?model.thumb_large_url:model.thumbnail_url;
+                RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) viewHolder.iv.getLayoutParams();
+                params.height=density>=2?model.thumb_large_height:model.thumbnail_height;
+                viewHolder.iv.setLayoutParams(params);
+                ImageLoader.getInstance().displayImage(imagUrl,viewHolder.iv,displayImageOptions);
+//                ImageLoader.getInstance().loadImage(imagUrl,displayImageOptions, new ImageLoadingListener() {
+//                    @Override
+//                    public void onLoadingStarted(String s, View view) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onLoadingFailed(String s, View view, FailReason failReason) {
+//                        viewHolder.iv.setImageResource(R.drawable.empty_photo);
+//                    }
+//
+//                    @Override
+//                    public void onLoadingComplete(String s, View view, Bitmap bitmap) {
+//                        RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) viewHolder.iv.getLayoutParams();
+//                        params.height=bitmap.getHeight();
+////                        Log.e("MainActivity","height="+params.height);
+//                        viewHolder.iv.setLayoutParams(params);
+//                        viewHolder.iv.setImageBitmap(bitmap);
+//                    }
+//
+//                    @Override
+//                    public void onLoadingCancelled(String s, View view) {
+//
+//                    }
+//                });
 
                 viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override

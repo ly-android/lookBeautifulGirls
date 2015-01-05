@@ -10,10 +10,14 @@ import android.os.Parcelable;
  */
 public class Model implements Parcelable {
     //头像
-    public String thumbURL;
-    public String hoverURL;
-    public String objURL;//大图
-    public String setTittle;//标题
+    public String thumbnail_url;
+    public int thumbnail_width;
+    public int thumbnail_height;
+    public int thumb_large_width;
+    public int thumb_large_height;
+    public String thumb_large_url;//中图
+    public String image_url;//原图
+    public String desc;//标题
 
 
     public Model() {
@@ -26,17 +30,25 @@ public class Model implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.thumbURL);
-        dest.writeString(this.hoverURL);
-        dest.writeString(this.objURL);
-        dest.writeString(this.setTittle);
+        dest.writeString(this.thumbnail_url);
+        dest.writeInt(this.thumbnail_width);
+        dest.writeInt(this.thumbnail_height);
+        dest.writeInt(this.thumb_large_width);
+        dest.writeInt(this.thumb_large_height);
+        dest.writeString(this.thumb_large_url);
+        dest.writeString(this.image_url);
+        dest.writeString(this.desc);
     }
 
     private Model(Parcel in) {
-        this.thumbURL = in.readString();
-        this.hoverURL = in.readString();
-        this.objURL = in.readString();
-        this.setTittle = in.readString();
+        this.thumbnail_url = in.readString();
+        this.thumbnail_width = in.readInt();
+        this.thumbnail_height = in.readInt();
+        this.thumb_large_width = in.readInt();
+        this.thumb_large_height = in.readInt();
+        this.thumb_large_url = in.readString();
+        this.image_url = in.readString();
+        this.desc = in.readString();
     }
 
     public static final Creator<Model> CREATOR = new Creator<Model>() {

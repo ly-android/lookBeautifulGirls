@@ -48,7 +48,7 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
         mImageView= (ImageView) findViewById(R.id.iv_shower);
         mAttacher=new PhotoViewAttacher(mImageView);
 
-        ImageLoader.getInstance().loadImage(model.objURL, displayImageOptions, new ImageLoadingListener() {
+        ImageLoader.getInstance().loadImage(model.image_url, displayImageOptions, new ImageLoadingListener() {
             @Override
             public void onLoadingStarted(String s, View view) {
 
