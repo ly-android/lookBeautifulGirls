@@ -28,7 +28,6 @@ public class App extends Application{
                 .tasksProcessingOrder(QueueProcessingType.LIFO)
                 .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
                 .imageDownloader(new BaseImageDownloader(this, 5 * 1000, 30 * 1000)) // connectTimeout (5 s), readTimeout (30 s)超时时间
-                .writeDebugLogs() // Remove for release app
                 .build();//开始构建
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config);

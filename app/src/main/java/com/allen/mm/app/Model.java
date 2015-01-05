@@ -3,12 +3,14 @@ package com.allen.mm.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
+
 /**
  * 描述:
  *
  * @author: liyong on 2014/12/31
  */
-public class Model implements Parcelable {
+public class Model implements Parcelable,Serializable{
     //头像
     public String thumbnail_url;
     public int thumbnail_width;

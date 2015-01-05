@@ -3,6 +3,7 @@ package com.allen.mm.app;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
     public static float density=1;
+    public static final String CACHE="CACHE";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,7 +157,8 @@ public class MainActivity extends ActionBarActivity {
             if(savedInstanceState!=null){
                 ArrayList tempList=savedInstanceState.getParcelableArrayList("list");
                 if(tempList!=null){
-                    this.list=savedInstanceState.getParcelableArrayList("list");
+                    this.list.clear();
+                    this.list.addAll(tempList);
                     recyclerView.getAdapter().notifyDataSetChanged();
                 }else{
                     load();
@@ -168,8 +171,53 @@ public class MainActivity extends ActionBarActivity {
             if(Utils.isNetworkAvailable(getActivity())){
                 onRefresh();
             }else{
-                Toast.makeText(getActivity(),"加载失败,请检查网络",Toast.LENGTH_LONG).show();
+                //取本地：
+                CacheManager.getInstance().getAsync(getActivity(),CACHE, new CacheManager.CacheHandler<ArrayList>() {
+
+                    @Override
+                    public void onSuccess(ArrayList arrayList) {
+                        if(arrayList==null){
+                            Toast.makeText(getActivity(),"加载失败,请检查网络",Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        list.clear();
+                        list.addAll(arrayList);
+                        recyclerView.getAdapter().notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        e.printStackTrace();
+                        Log.e("MainActivity","CacheManager.getAsync errer");
+                        Toast.makeText(getActivity(),"加载失败,请检查网络",Toast.LENGTH_LONG).show();
+                    }
+                });
+//                Toast.makeText(getActivity(),"加载失败,请检查网络",Toast.LENGTH_LONG).show();
             }
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            //缓存到本地
+            CacheManager.getInstance().putAsync(getActivity(),CACHE, list, new CacheManager.CacheHandler<ArrayList>() {
+                @Override
+                public void onSuccess(ArrayList arrayList) {
+                    Log.d("MainActivity", "CacheManager ok");
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    e.printStackTrace();
+                    Log.e("MainActivity", "CacheManager.putAsync errer");
+                }
+            });
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            CacheManager.getInstance().destory();
         }
 
         @Override
@@ -193,13 +241,13 @@ public class MainActivity extends ActionBarActivity {
                         try {
                             JSONArray imags=response.getJSONArray("data");
                             if(imags!=null){
-                                if(page==1){
+                                if(page==0){
                                     list.clear();
                                 }
                                 for (int i = 0; i < imags.length(); i++) {
                                     JSONObject object=imags.getJSONObject(i);
                                     Model model=new Model();
-                                    model.desc=object.getString("desc");
+                                    model.desc=object.getString("abs");
                                     model.thumbnail_url=object.getString("thumbnail_url");
                                     model.thumb_large_url=object.getString("thumb_large_url");
                                     model.image_url=object.getString("image_url");
@@ -218,7 +266,7 @@ public class MainActivity extends ActionBarActivity {
                 }
 
                 @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                     refreshLayout.setRefreshing(false);
                     Log.e("MainActivity",throwable.getMessage());
                     Toast.makeText(getActivity(),"加载失败",Toast.LENGTH_LONG).show();
@@ -275,7 +323,7 @@ public class MainActivity extends ActionBarActivity {
                         int x = location[0];
                         int y = location[1];
                         Intent intent=new Intent(getActivity(),ImageActivity.class);
-                        intent.putExtra("model",model);
+                        intent.putExtra("model",(Parcelable)model);
                         ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
                         ActivityCompat.startActivity(getActivity(),intent,optionsCompat.toBundle());
                     }
