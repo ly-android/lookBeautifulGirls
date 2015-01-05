@@ -1,4 +1,5 @@
 -from it ,you can learn swipeRefreshLayout,recycleView,StaggeredGridLayoutManager
+=
 dependencies:
             nineoldandroids
             photoview
