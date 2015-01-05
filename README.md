@@ -1,8 +1,8 @@
-#from it ,you can learn swipeRefreshLayout,recycleView,StaggeredGridLayoutManager<br/>
+##from it ,you can learn swipeRefreshLayout,recycleView,StaggeredGridLayoutManager<br/>
 ##dependencies:<br/>
-            -nineoldandroids<br/>
-            -photoview<br/>
-            -android-async-http<br/>
-            -androidUrlImageLoader<br/>
+            -nineoldandroids
+            -photoview
+            -android-async-http
+            -androidUrlImageLoader
 
 ##look beautiful grils use it<br/>
