@@ -75,40 +75,41 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
         mAttacher.setOnPhotoTapListener(this);
     }
 
-   private void animatFinish(){
-       AnimatorSet set = new AnimatorSet();
-       set.playTogether(
-               ObjectAnimator.ofFloat(rootView, "scaleX", 1, 0),
-               ObjectAnimator.ofFloat(rootView, "scaleY", 1, 0),
-               ObjectAnimator.ofFloat(rootView, "alpha", 1, 0.2f)
-       );
-       set.addListener(new Animator.AnimatorListener() {
-           @Override
-           public void onAnimationStart(Animator animation) {
-
-           }
-
-           @Override
-           public void onAnimationEnd(Animator animation) {
-               onBackPressed();
-           }
-
-           @Override
-           public void onAnimationCancel(Animator animation) {
-
-           }
-
-           @Override
-           public void onAnimationRepeat(Animator animation) {
-
-           }
-       });
-       set.setInterpolator(new AccelerateInterpolator());
-       set.setDuration(500).start();
-   }
-
     @Override
     public void onPhotoTap(View view, float v, float v1) {
-        animatFinish();
+        onBackPressed();
+    }
+
+    @Override
+    public void onBackPressed() {
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                ObjectAnimator.ofFloat(rootView, "scaleX", 1, 0),
+                ObjectAnimator.ofFloat(rootView, "scaleY", 1, 0),
+                ObjectAnimator.ofFloat(rootView, "alpha", 1, 0.2f)
+        );
+        set.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+               ImageActivity.super.onBackPressed();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        set.setInterpolator(new AccelerateInterpolator());
+        set.setDuration(200).start();
     }
 }
