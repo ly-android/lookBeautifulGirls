@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.allen.mm.app.fragment.GifFragment;
 import com.allen.mm.app.fragment.MMFragment;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
@@ -24,6 +25,7 @@ public class MainActivity extends FragmentActivity {
     static final String TAB_MM="tab_mm";
     static final String TAB_SEX="tab_sex";
     static final String TAB_SIWA="tab_siwa";
+    static final String TAB_DZ="tab_DZ";
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -95,14 +97,7 @@ public class MainActivity extends FragmentActivity {
                         show(2);
                         break;
                     case 3:
-//                        if (drawerArrowColor) {
-//                            drawerArrowColor = false;
-//                            drawerArrow.setColor(R.color.ldrawer_color);
-//                        } else {
-//                            drawerArrowColor = true;
-//                            drawerArrow.setColor(R.color.drawer_arrow_second_color);
-//                        }
-//                        mDrawerToggle.syncState();
+                      show(3);
                         break;
                 }
 
@@ -142,6 +137,15 @@ public class MainActivity extends FragmentActivity {
                 }else{
                     fragment= MMFragment.instance(MMFragment.TAB_SW);
                     transaction.add(R.id.container,fragment,TAB_SIWA);
+                }
+                break;
+            case 3:
+                fragment=getSupportFragmentManager().findFragmentByTag(TAB_DZ);
+                if(fragment!=null){
+                    transaction.show(fragment);
+                }else{
+                    fragment= GifFragment.instance();
+                    transaction.add(R.id.container,fragment,TAB_DZ);
                 }
                 break;
         }

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <integer-array name="google_colors">
+        <item>@color/red</item>
+        <item>@color/blue</item>
+        <item>@color/yellow</item>
+        <item>@color/green</item>
+    </integer-array>
     <string name="app_name">天天看妹纸</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

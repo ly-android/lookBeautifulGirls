@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:padding="2dp"
+              android:layout_marginTop="10dp"
+              android:background="@drawable/card_item"
+              android:layout_height="wrap_content">
+    <TextView android:id="@+id/tv_title"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="18sp"
+              android:text="奇葩的名族"
+              android:layout_margin="5dp"
+              android:singleLine="true"
+              android:textColor="#000000"/>
+    <com.felipecsl.gifimageview.library.GifImageView
+               android:id="@+id/iv_card"
+               android:scaleType="centerCrop"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:src="@drawable/empty_photo"
+            />
+</LinearLayout>

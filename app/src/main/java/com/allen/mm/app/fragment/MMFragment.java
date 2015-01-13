@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -17,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.allen.mm.app.*;
+import com.baoyz.widget.PullRefreshLayout;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -34,11 +34,11 @@ import java.util.ArrayList;
  *
  * @author: liyong on 2015/1/12
  */
-public class MMFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshListener{
     public static float density=1;
     public static final String CACHE="CACHE";
     DisplayImageOptions displayImageOptions;
-    SwipeRefreshLayout refreshLayout;
+    PullRefreshLayout refreshLayout;
     RecyclerView recyclerView;
 
     int page=0;
@@ -93,11 +93,9 @@ public class MMFragment extends Fragment implements SwipeRefreshLayout.OnRefresh
     }
 
     private void initViews(View rootView) {
-        refreshLayout= (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
-        refreshLayout.setColorSchemeColors(android.R.color.holo_blue_dark, android.R.color.holo_purple,
-                android.R.color.holo_orange_dark, android.R.color.holo_green_light);
+        refreshLayout= (PullRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
         refreshLayout.setOnRefreshListener(this);
-
+        refreshLayout.setRefreshStyle(PullRefreshLayout.STYLE_RING);
         recyclerView= (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
         // 交错网格布局管理器
@@ -140,10 +138,10 @@ public class MMFragment extends Fragment implements SwipeRefreshLayout.OnRefresh
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 //解决RecyclerView和SwipeRefreshLayout共用存在的bug
-                int into[]=new int[2];
-                staggeredGridLayoutManager
-                        .findFirstCompletelyVisibleItemPositions(into);
-                refreshLayout.setEnabled(into[0] == 0||into[1]==0);
+//                int into[]=new int[2];
+//                staggeredGridLayoutManager
+//                        .findFirstCompletelyVisibleItemPositions(into);
+//                refreshLayout.setEnabled(into[0] == 0||into[1]==0);
             }
         });
     }
@@ -237,7 +235,7 @@ public class MMFragment extends Fragment implements SwipeRefreshLayout.OnRefresh
             url=Config.API_MM_SW;
         else if(currentTab==TAB_XG)
             url=Config.API_MM_XG;
-
+        refreshLayout.setRefreshing(true);
         httpClient.get(getActivity(), String.format(url, page, pageSize),new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -270,6 +268,7 @@ public class MMFragment extends Fragment implements SwipeRefreshLayout.OnRefresh
             if(imags!=null){
                 if(page==0){
                     list.clear();
+                    preLength=0;
                 }
                 for (int i = 0; i < imags.length(); i++) {
                     JSONObject object=imags.getJSONObject(i);
