@@ -13,9 +13,16 @@ repositories {
 }
 
 android {
+    signingConfigs {
+        sign {
+            keyAlias 'allen'
+            keyPassword '123456'
+            storeFile file('C:/Users/Administrator/Desktop/allen.keystore.jks')
+            storePassword '123456'
+        }
+    }
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
         applicationId "com.allen.mm.app"
         minSdkVersion 14
@@ -27,16 +34,22 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile 'E:/lookBeautifulGirls/app/proguard-rules.pro'
+            signingConfig signingConfigs.sign
+            debuggable false
         }
+    }
+    productFlavors {
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.+'
     compile 'com.android.support:recyclerview-v7:+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile 'com.nineoldandroids:library:2.4.0'
+    compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.+'
 }

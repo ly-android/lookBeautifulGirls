@@ -95,7 +95,7 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
     private void initViews(View rootView) {
         refreshLayout= (PullRefreshLayout) rootView.findViewById(R.id.swipeRefresh);
         refreshLayout.setOnRefreshListener(this);
-        refreshLayout.setRefreshStyle(PullRefreshLayout.STYLE_RING);
+        refreshLayout.setRefreshStyle(PullRefreshLayout.STYLE_MATERIAL);
         recyclerView= (RecyclerView) rootView.findViewById(R.id.recyclerView);
 
         // 交错网格布局管理器
@@ -225,6 +225,7 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
     public void onRefresh() {
         //TODO 刷新
         page=0;
+        refreshLayout.setRefreshing(true);
         getData();
     }
     private void getData(){
@@ -235,7 +236,6 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
             url=Config.API_MM_SW;
         else if(currentTab==TAB_XG)
             url=Config.API_MM_XG;
-        refreshLayout.setRefreshing(true);
         httpClient.get(getActivity(), String.format(url, page, pageSize),new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -287,13 +287,16 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
                         model.thumbnail_url=object.getString("mid_url");
                         model.thumb_large_url=object.getString("large_url");
                         model.image_url=object.getString("obj_url");
-                        model.thumbnail_height=object.getInt("height")*2/3;
+                        model.thumbnail_height=object.getInt("height")/2;
                         model.thumbnail_width=object.getInt("width");
-                        model.thumb_large_height=object.getInt("height");
+                        model.thumb_large_height=object.getInt("height")/2;
                         model.thumb_large_width=object.getInt("width");
                     }
                     list.add(model);
-                    recyclerView.getAdapter().notifyItemInserted(preLength-1+i);
+                    if(preLength==0)
+                        recyclerView.getAdapter().notifyDataSetChanged();
+                    else
+                        recyclerView.getAdapter().notifyItemInserted(preLength-1+i);
                 }
 //                            recyclerView.getAdapter().notifyItemRangeInserted(preLength,imags.length());
 

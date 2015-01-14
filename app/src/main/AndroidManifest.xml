@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ImageActivity" android:theme="@style/Theme.Transparent"/>
+        <activity android:name=".GifActivity" android:theme="@style/Theme.Transparent"/>
     </application>
 
 </manifest>

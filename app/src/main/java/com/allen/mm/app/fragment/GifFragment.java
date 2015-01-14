@@ -14,10 +14,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AbsListView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.allen.mm.app.*;
 import com.baoyz.widget.PullRefreshLayout;
-import com.felipecsl.gifimageview.library.GifImageView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -27,9 +29,10 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import pl.droidsonroids.gif.GifDrawable;
+import pl.droidsonroids.gif.GifImageView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 描述:gif 布局
@@ -43,7 +46,7 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
     int page=1;
     int pageSize=20;
     AsyncHttpClient httpClient;
-    List<GifModel> list;
+    ArrayList<GifModel> list;
 
     public static GifFragment instance(){
         return new GifFragment();
@@ -77,7 +80,7 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
         final LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
         layout.setOnRefreshListener(this);
-        layout.setRefreshStyle(PullRefreshLayout.STYLE_RING);
+        layout.setRefreshStyle(PullRefreshLayout.STYLE_MATERIAL);
         recyclerView.setAdapter(new GifAdapter());
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -113,6 +116,13 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(outState!=null)
+            outState.putParcelableArrayList("list",list);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState!=null){
@@ -122,20 +132,20 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
                 this.list.addAll(tempList);
                 recyclerView.getAdapter().notifyDataSetChanged();
             }else{
-                getData();
+                onRefresh();
             }
         }else
-            getData();
+            onRefresh();
     }
 
     @Override
     public void onRefresh() {
         page=1;
+        layout.setRefreshing(true);
         getData();
     }
 
     private void getData() {
-         layout.setRefreshing(true);
          httpClient.get(getActivity(),String.format(Config.API_DZ, page, pageSize),new JsonHttpResponseHandler(){
              @Override
              public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -162,7 +172,10 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
                                      model.is_gif=object.getInt("is_gif");
 
                                  list.add(model);
-                                 recyclerView.getAdapter().notifyItemInserted(preLength-1+i);
+                                 if(preLength==0)
+                                     recyclerView.getAdapter().notifyDataSetChanged();
+                                 else
+                                     recyclerView.getAdapter().notifyItemInserted(preLength - 1 + i);
                              }
 //                            recyclerView.getAdapter().notifyItemRangeInserted(preLength,imags.length());
 
@@ -192,7 +205,7 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
             final GifModel model=list.get(i);
             viewHolder.tv.setText(model.text);
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-            params.height=model.height;
+            params.height=model.height/2;
             viewHolder.iv.setLayoutParams(params);
             String imagUrl=null;
             if(model.is_gif==0){
@@ -201,12 +214,19 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
             }
             else{
                 imagUrl=model.gifFistFrame;
+//                viewHolder.iv.startAnimation();
                 httpClient.get(getActivity(), model.image0, new BinaryHttpResponseHandler() {
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] bytes) {
                          if(bytes!=null){
-                             viewHolder.iv.setBytes(bytes);
-                             viewHolder.iv.startAnimation();
+                             try {
+                                 GifDrawable gifDrawable=new GifDrawable(bytes);
+                                 if(gifDrawable!=null)
+                                     viewHolder.iv.setImageDrawable(gifDrawable);
+                                 gifDrawable.start();
+                             } catch (Exception e) {
+                                 e.printStackTrace();
+                             }
                          }
                     }
 
@@ -221,24 +241,27 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
                     }
                 });
             }
-
-
-            if(model.is_gif==0)
-                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int[] location = new int[2];
-                        v.getLocationOnScreen(location);
-                        int x = location[0];
-                        int y = location[1];
-                        Intent intent=new Intent(getActivity(),ImageActivity.class);
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int[] location = new int[2];
+                    v.getLocationOnScreen(location);
+                    int x = location[0];
+                    int y = location[1];
+                    Intent intent=null;
+                    if(model.is_gif==0){
+                        intent=new Intent(getActivity(),ImageActivity.class);
                         Model model1=new Model();
                         model1.image_url=model.image0;
                         intent.putExtra("model",(Parcelable)model1);
-                        ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
-                        ActivityCompat.startActivity(getActivity(), intent, optionsCompat.toBundle());
+                    }else{
+                        intent=new Intent(getActivity(),GifActivity.class);
+                        intent.putExtra("url",model.image0);
                     }
-                });
+                    ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
+                    ActivityCompat.startActivity(getActivity(), intent, optionsCompat.toBundle());
+                }
+            });
         }
 
         @Override

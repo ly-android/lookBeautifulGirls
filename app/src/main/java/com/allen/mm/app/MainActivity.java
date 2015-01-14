@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.allen.mm.app.fragment.GifFragment;
 import com.allen.mm.app.fragment.MMFragment;
+import com.allen.mm.app.fragment.VideoFragment;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
 
@@ -26,6 +27,7 @@ public class MainActivity extends FragmentActivity {
     static final String TAB_SEX="tab_sex";
     static final String TAB_SIWA="tab_siwa";
     static final String TAB_DZ="tab_DZ";
+    static final String TAB_SP="tab_sp";
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -36,7 +38,8 @@ public class MainActivity extends FragmentActivity {
             "美女",
             "性感",
             "丝袜",
-            "段子"
+            "段子",
+            "视频"
     };
     MenuAdapter menuAdapter;
     @Override
@@ -97,7 +100,10 @@ public class MainActivity extends FragmentActivity {
                         show(2);
                         break;
                     case 3:
-                      show(3);
+                        show(3);
+                        break;
+                    case 4:
+                        show(4);
                         break;
                 }
 
@@ -146,6 +152,15 @@ public class MainActivity extends FragmentActivity {
                 }else{
                     fragment= GifFragment.instance();
                     transaction.add(R.id.container,fragment,TAB_DZ);
+                }
+                break;
+            case 4:
+                fragment=getSupportFragmentManager().findFragmentByTag(TAB_SP);
+                if(fragment!=null){
+                    transaction.show(fragment);
+                }else{
+                    fragment= VideoFragment.instance();
+                    transaction.add(R.id.container,fragment,TAB_SP);
                 }
                 break;
         }
