@@ -25,6 +25,7 @@ public class GifActivity extends Activity implements View.OnClickListener {
     GifImageView imageView;
     AsyncHttpClient http;
     View rootView;
+    byte[] bytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,33 +35,43 @@ public class GifActivity extends Activity implements View.OnClickListener {
         imageView= (GifImageView) findViewById(R.id.gifImageView);
         rootView=findViewById(android.R.id.content);
         url=getIntent().getStringExtra("url");
-        http.get(this, url, new BinaryHttpResponseHandler() {
-            @Override
-            public void onSuccess(int i, Header[] headers, byte[] bytes) {
-                if(bytes!=null){
-                    try {
-                        GifDrawable gifDrawable=new GifDrawable(bytes);
-                        if(gifDrawable!=null)
-                            imageView.setImageDrawable(gifDrawable);
-                        gifDrawable.start();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+        bytes=getIntent().getByteArrayExtra("byte");
+        if(bytes==null) {
+            http.get(this, url, new BinaryHttpResponseHandler() {
+                @Override
+                public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                    if (bytes != null) {
+                        setGifDrawable(bytes);
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                Toast.makeText(getApplicationContext(),"加载失败",Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                    Toast.makeText(getApplicationContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onProgress(int bytesWritten, int totalSize) {
-                super.onProgress(bytesWritten, totalSize);
-            }
-        });
+                @Override
+                public void onProgress(int bytesWritten, int totalSize) {
+                    super.onProgress(bytesWritten, totalSize);
+                }
+            });
+        }else{
+            setGifDrawable(bytes);
+        }
         rootView.setOnClickListener(this);
     }
+
+    private void setGifDrawable(byte[] bytes) {
+        try {
+            GifDrawable gifDrawable = new GifDrawable(bytes);
+            if (gifDrawable != null)
+                imageView.setImageDrawable(gifDrawable);
+            gifDrawable.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void onClick(View v) {

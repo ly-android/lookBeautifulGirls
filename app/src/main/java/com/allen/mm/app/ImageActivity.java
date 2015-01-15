@@ -1,14 +1,18 @@
 package com.allen.mm.app;
 
 import android.app.Activity;
+import android.app.WallpaperManager;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ObjectAnimator;
+import android.widget.ShareActionProvider;
+import android.widget.Toast;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -16,20 +20,30 @@ import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
+import java.io.File;
+
 /**
  * 描述:
  *
  * @author: liyong on 2015/1/4
  */
 public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhotoTapListener {
+
+    private ShareActionProvider mShareActionProvider;
+
     ImageView mImageView;
     PhotoViewAttacher mAttacher;
     Model model;
     DisplayImageOptions displayImageOptions;
     View rootView;
+    Bitmap mBitmap;
+    Intent shareIntent;
+    Menu menu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        model=getIntent().getParcelableExtra("model");
+        initActionBar();
         setContentView(R.layout.image_layout);
         rootView=findViewById(android.R.id.content);
         displayImageOptions = new DisplayImageOptions.Builder()
@@ -44,7 +58,6 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
                 .displayer(new SimpleBitmapDisplayer())//是否图片加载好后渐入的动画时间
                 .build();//构建完成
 
-        model=getIntent().getParcelableExtra("model");
         mImageView= (ImageView) findViewById(R.id.iv_shower);
         mAttacher=new PhotoViewAttacher(mImageView);
 
@@ -62,8 +75,11 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
 
             @Override
             public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-                  mImageView.setImageBitmap(bitmap);
-                  mAttacher.update();
+                mBitmap=bitmap;
+                mImageView.setImageBitmap(bitmap);
+                mAttacher.update();
+                if(menu!=null)
+                    setMenu(menu);
             }
 
             @Override
@@ -75,6 +91,75 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
         mAttacher.setOnPhotoTapListener(this);
     }
 
+    private void initActionBar(){
+        getActionBar().show();
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.menu=menu;
+        return super.onCreateOptionsMenu(menu);
+    }
+    private void setMenu(Menu menu){
+        MenuItem item=menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider)item.
+                getActionProvider();
+        shareIntent=createShareIntent();
+        mShareActionProvider.setShareIntent(shareIntent);
+    }
+    /**
+     * Creates a sharing {@link Intent}.
+     *
+     * @return The sharing intent.
+     */
+    private Intent createShareIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/*");
+        File file=ImageLoader.getInstance().getDiskCache().get(model.image_url);
+        if(file!=null) {
+            Uri uri = Uri.fromFile(file);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        }
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "分享");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "更多精彩,在《天天看妹纸》");
+        shareIntent.putExtra(Intent.EXTRA_TITLE, "美女");
+        return shareIntent;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                break;
+            case R.id.action_share:
+                Log.d("ly","分享中..");
+                break;
+            case R.id.action_wall:
+                //设置壁纸：
+                setWallpaper();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void setWallpaper(){
+        try {
+            if(mBitmap==null||mBitmap.isRecycled())return;
+            WallpaperManager instance = WallpaperManager.getInstance(this);
+            int desiredMinimumWidth = getWindowManager().getDefaultDisplay().getWidth();
+            int desiredMinimumHeight = getWindowManager().getDefaultDisplay().getHeight();
+            instance.suggestDesiredDimensions(desiredMinimumWidth, desiredMinimumHeight);
+            instance.setBitmap(mBitmap);
+            Toast.makeText(this, "壁纸设置成功", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onPhotoTap(View view, float v, float v1) {
         onBackPressed();
@@ -82,34 +167,36 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
 
     @Override
     public void onBackPressed() {
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-                ObjectAnimator.ofFloat(rootView, "scaleX", 1, 0),
-                ObjectAnimator.ofFloat(rootView, "scaleY", 1, 0),
-                ObjectAnimator.ofFloat(rootView, "alpha", 1, 0.2f)
-        );
-        set.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-               ImageActivity.super.onBackPressed();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        set.setInterpolator(new AccelerateInterpolator());
-        set.setDuration(200).start();
+//        AnimatorSet set = new AnimatorSet();
+//        set.playTogether(
+//                ObjectAnimator.ofFloat(rootView, "scaleX", 1, 0),
+//                ObjectAnimator.ofFloat(rootView, "scaleY", 1, 0),
+//                ObjectAnimator.ofFloat(rootView, "alpha", 1, 0.2f)
+//        );
+//        set.addListener(new Animator.AnimatorListener() {
+//            @Override
+//            public void onAnimationStart(Animator animation) {
+//
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//               ImageActivity.super.onBackPressed();
+//            }
+//
+//            @Override
+//            public void onAnimationCancel(Animator animation) {
+//
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animator animation) {
+//
+//            }
+//        });
+//        set.setInterpolator(new AccelerateInterpolator());
+//        set.setDuration(200).start();
+        super.onBackPressed();
+        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
     }
 }

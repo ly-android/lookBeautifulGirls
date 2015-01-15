@@ -193,7 +193,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
          });
     }
     class GifAdapter extends RecyclerView.Adapter<GifAdapter.Holder>{
-
+        byte[] intentBytes=null;
         @Override
         public GifAdapter.Holder onCreateViewHolder(ViewGroup viewGroup, int i) {
             return new Holder(LayoutInflater.from(getActivity()).inflate(R.layout.card_layout,viewGroup,false));
@@ -208,6 +208,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
             params.height=w*model.height/model.width;
             viewHolder.iv.setLayoutParams(params);
             String imagUrl=null;
+
             if(model.is_gif==0){
                 imagUrl= TextUtils.isEmpty(model.image0)?model.image1:model.image2;
                 ImageLoader.getInstance().displayImage(imagUrl,viewHolder.iv,displayImageOptions);
@@ -219,6 +220,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] bytes) {
                          if(bytes!=null){
+                             intentBytes=bytes;
                              try {
                                  GifDrawable gifDrawable=new GifDrawable(bytes);
                                  if(gifDrawable!=null)
@@ -257,6 +259,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
                     }else{
                         intent=new Intent(getActivity(),GifActivity.class);
                         intent.putExtra("url",model.image0);
+                        intent.putExtra("byte",intentBytes);
                     }
                     ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
                     ActivityCompat.startActivity(getActivity(), intent, optionsCompat.toBundle());
