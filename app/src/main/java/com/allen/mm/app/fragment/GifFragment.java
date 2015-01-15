@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -39,7 +38,7 @@ import java.util.ArrayList;
  *
  * @author: liyong on 2015/1/13
  */
-public class GifFragment extends Fragment implements PullRefreshLayout.OnRefreshListener {
+public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRefreshListener {
     DisplayImageOptions displayImageOptions;
     PullRefreshLayout layout;
     RecyclerView recyclerView;
@@ -205,7 +204,8 @@ public class GifFragment extends Fragment implements PullRefreshLayout.OnRefresh
             final GifModel model=list.get(i);
             viewHolder.tv.setText(model.text);
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-            params.height=model.height/2;
+            int w=width-Utils.dip2px(getActivity(),30);
+            params.height=w*model.height/model.width;
             viewHolder.iv.setLayoutParams(params);
             String imagUrl=null;
             if(model.is_gif==0){

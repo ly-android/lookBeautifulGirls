@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -21,6 +20,7 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -34,8 +34,7 @@ import java.util.ArrayList;
  *
  * @author: liyong on 2015/1/12
  */
-public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshListener{
-    public static float density=1;
+public class MMFragment extends BaseFragment implements PullRefreshLayout.OnRefreshListener{
     public static final String CACHE="CACHE";
     DisplayImageOptions displayImageOptions;
     PullRefreshLayout refreshLayout;
@@ -81,6 +80,7 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
                 .bitmapConfig(Bitmap.Config.RGB_565)//设置图片的解码类型//
                 .resetViewBeforeLoading(true)//设置图片在下载前是否重置，复位
                 .displayer(new FadeInBitmapDisplayer(100))//是否图片加载好后渐入的动画时间
+                .imageScaleType(ImageScaleType.NONE)
                 .build();//构建完成
     }
 
@@ -285,11 +285,11 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
                     }else{
                         model.desc=object.optString("di");
                         model.thumbnail_url=object.getString("mid_url");
-                        model.thumb_large_url=object.getString("large_url");
+                        model.thumb_large_url=object.getString("obj_url");
                         model.image_url=object.getString("obj_url");
-                        model.thumbnail_height=object.getInt("height")/2;
-                        model.thumbnail_width=object.getInt("width");
-                        model.thumb_large_height=object.getInt("height")/2;
+                        model.thumbnail_height=object.getInt("height")/3;
+                        model.thumbnail_width=object.getInt("width")/3;
+                        model.thumb_large_height=object.getInt("height");
                         model.thumb_large_width=object.getInt("width");
                     }
                     list.add(model);
@@ -319,7 +319,8 @@ public class MMFragment extends Fragment implements PullRefreshLayout.OnRefreshL
             viewHolder.tv.setText(model.desc);
             String imagUrl=density>=2?model.thumb_large_url:model.thumbnail_url;
             RelativeLayout.LayoutParams params= (RelativeLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-            params.height=density>=2?model.thumb_large_height:model.thumbnail_height;
+            int w=width-Utils.dip2px(getActivity(),20);
+            params.height=density>=2?(w/2*model.thumb_large_height/model.thumb_large_width):(w/2*model.thumbnail_height/model.thumbnail_width);
             viewHolder.iv.setLayoutParams(params);
             ImageLoader.getInstance().displayImage(imagUrl,viewHolder.iv,displayImageOptions);
 //                ImageLoader.getInstance().loadImage(imagUrl,displayImageOptions, new ImageLoadingListener() {

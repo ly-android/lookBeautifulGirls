@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -13,9 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.allen.mm.app.Config;
-import com.allen.mm.app.R;
-import com.allen.mm.app.VideoModel;
+import com.allen.mm.app.*;
 import com.baoyz.widget.PullRefreshLayout;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -33,7 +30,7 @@ import java.util.ArrayList;
  *
  * @author: liyong on 2015/1/14
  */
-public class VideoFragment extends Fragment implements PullRefreshLayout.OnRefreshListener {
+public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnRefreshListener {
     DisplayImageOptions displayImageOptions;
     AsyncHttpClient httpClient;
     PullRefreshLayout pullRefreshLayout;
@@ -42,8 +39,6 @@ public class VideoFragment extends Fragment implements PullRefreshLayout.OnRefre
     int pageSize=20;
     String maxTime;
     ArrayList<VideoModel> list;
-    int width;
-    int height;
 
 
     public static VideoFragment instance(){
@@ -67,8 +62,6 @@ public class VideoFragment extends Fragment implements PullRefreshLayout.OnRefre
                 .resetViewBeforeLoading(true)//设置图片在下载前是否重置，复位
                 .displayer(new FadeInBitmapDisplayer(100))//是否图片加载好后渐入的动画时间
                 .build();//构建完成
-        width=getResources().getDisplayMetrics().widthPixels;
-        height=getResources().getDisplayMetrics().heightPixels;
     }
 
     @Override
@@ -232,7 +225,8 @@ public class VideoFragment extends Fragment implements PullRefreshLayout.OnRefre
             viewHolder.tv_time.setText(getTime(model.videotime));
 
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.layout_video.getLayoutParams();
-            params.height=width*model.height/model.width;
+            int w=width-Utils.dip2px(getActivity(),30);
+            params.height=w*model.height/model.width;
             viewHolder.layout_video.setLayoutParams(params);
 
             viewHolder.iv_video.setVisibility(View.VISIBLE);
@@ -243,6 +237,15 @@ public class VideoFragment extends Fragment implements PullRefreshLayout.OnRefre
                 @Override
                 public void onPrepared(MediaPlayer mp) {
 //                    viewHolder.videoView.pause();
+                }
+            });
+            viewHolder.videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    viewHolder.videoView.stopPlayback();
+                    viewHolder.layout_bottom.setVisibility(View.VISIBLE);
+                    viewHolder.iv_player.setVisibility(View.VISIBLE);
+                    viewHolder.iv_video.setVisibility(View.VISIBLE);
                 }
             });
             viewHolder.position=i;
