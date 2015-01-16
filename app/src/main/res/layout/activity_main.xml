@@ -22,5 +22,22 @@
             android:dividerHeight="0dp"
             android:drawSelectorOnTop="false">
     </ListView>
+    <LinearLayout
+            android:id="@+id/right_menu"
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:background="#f5636363"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:orientation="vertical">
+         <TextView
+                 android:id="@+id/tv_change_skin"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="换肤"
+                 android:textSize="22sp"
+                 android:textColor="#ffffff"
+                 />
+    </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

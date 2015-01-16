@@ -1,6 +1,5 @@
 package com.allen.mm.app;
 
-import android.app.Activity;
 import android.app.WallpaperManager;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,7 +29,7 @@ import java.io.File;
  *
  * @author: liyong on 2015/1/4
  */
-public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhotoTapListener {
+public class ImageActivity extends BaseActivity implements PhotoViewAttacher.OnPhotoTapListener {
 
     private ShareActionProvider mShareActionProvider;
 
