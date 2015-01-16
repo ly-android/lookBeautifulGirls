@@ -1,4 +1,4 @@
-package com.allen.mm.app;
+package com.allen.mm.app.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

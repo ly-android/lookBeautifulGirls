@@ -1,4 +1,4 @@
-package com.allen.mm.app;
+package com.allen.mm.app.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

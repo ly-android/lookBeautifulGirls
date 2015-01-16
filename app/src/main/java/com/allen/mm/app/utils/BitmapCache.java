@@ -1,4 +1,4 @@
-package com.allen.mm.app;
+package com.allen.mm.app.utils;
 
 import android.graphics.Bitmap;
 import com.nostra13.universalimageloader.cache.memory.MemoryCache;
