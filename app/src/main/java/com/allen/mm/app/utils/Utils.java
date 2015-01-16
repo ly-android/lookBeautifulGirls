@@ -1,6 +1,8 @@
 package com.allen.mm.app.utils;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -10,6 +12,14 @@ import android.net.NetworkInfo;
  * @author: liyong on 2015/1/4
  */
 public class Utils {
+
+    public static AlertDialog showDialog(Context context,String message,DialogInterface.OnClickListener okListener,DialogInterface.OnClickListener cancelListener){
+        AlertDialog dialog=null;
+        AlertDialog.Builder builder=new AlertDialog.Builder(context);
+        dialog=builder.setMessage(message).setPositiveButton("确定", okListener).setNegativeButton("取消",cancelListener).create();
+        return dialog;
+    }
+
     public static boolean isNetworkAvailable(Context c) {
         ConnectivityManager connectivityManager = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = connectivityManager.getActiveNetworkInfo();

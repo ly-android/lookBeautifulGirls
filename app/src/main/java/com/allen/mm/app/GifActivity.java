@@ -25,39 +25,34 @@ public class GifActivity extends Activity implements View.OnClickListener {
     GifImageView imageView;
     AsyncHttpClient http;
     View rootView;
-    byte[] bytes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gif_activity);
-        http=new AsyncHttpClient();
-        imageView= (GifImageView) findViewById(R.id.gifImageView);
-        rootView=findViewById(android.R.id.content);
-        url=getIntent().getStringExtra("url");
-        bytes=getIntent().getByteArrayExtra("byte");
-        if(bytes==null) {
-            http.get(this, url, new BinaryHttpResponseHandler() {
-                @Override
-                public void onSuccess(int i, Header[] headers, byte[] bytes) {
-                    if (bytes != null) {
-                        setGifDrawable(bytes);
-                    }
+        http = new AsyncHttpClient();
+        imageView = (GifImageView) findViewById(R.id.gifImageView);
+        rootView = findViewById(android.R.id.content);
+        url = getIntent().getStringExtra("url");
+        http.get(this, url, new BinaryHttpResponseHandler() {
+            @Override
+            public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                if (bytes != null) {
+                    setGifDrawable(bytes);
                 }
+            }
 
-                @Override
-                public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                    Toast.makeText(getApplicationContext(), "加载失败", Toast.LENGTH_SHORT).show();
-                }
+            @Override
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                Toast.makeText(getApplicationContext(), "加载失败", Toast.LENGTH_SHORT).show();
+            }
 
-                @Override
-                public void onProgress(int bytesWritten, int totalSize) {
-                    super.onProgress(bytesWritten, totalSize);
-                }
-            });
-        }else{
-            setGifDrawable(bytes);
-        }
+            @Override
+            public void onProgress(int bytesWritten, int totalSize) {
+                super.onProgress(bytesWritten, totalSize);
+            }
+        });
+
         rootView.setOnClickListener(this);
     }
 
@@ -77,6 +72,7 @@ public class GifActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         onBackPressed();
     }
+
     @Override
     public void onBackPressed() {
         AnimatorSet set = new AnimatorSet();

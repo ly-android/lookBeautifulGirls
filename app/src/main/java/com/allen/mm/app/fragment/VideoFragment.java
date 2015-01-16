@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.allen.mm.app.*;
+import com.allen.mm.app.model.VideoModel;
+import com.allen.mm.app.utils.Utils;
 import com.baoyz.widget.PullRefreshLayout;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -110,6 +112,7 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
                         videoAdapter.mHolder.layout_bottom.setVisibility(View.VISIBLE);
                         videoAdapter.mHolder.iv_player.setVisibility(View.VISIBLE);
                         videoAdapter.mHolder.iv_video.setVisibility(View.VISIBLE);
+                        videoAdapter.mHolder=null;
                     }
                 }
             }
@@ -225,11 +228,14 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
             viewHolder.tv_time.setText(getTime(model.videotime));
 
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.layout_video.getLayoutParams();
-            int w=width-Utils.dip2px(getActivity(),30);
+            int w=width- Utils.dip2px(getActivity(), 30);
             params.height=w*model.height/model.width;
             viewHolder.layout_video.setLayoutParams(params);
 
+            viewHolder.layout_bottom.setVisibility(View.VISIBLE);
+            viewHolder.iv_player.setVisibility(View.VISIBLE);
             viewHolder.iv_video.setVisibility(View.VISIBLE);
+
             String  imagUrl= TextUtils.isEmpty(model.image0)?model.image1:model.image2;
             ImageLoader.getInstance().displayImage(imagUrl,viewHolder.iv_video,displayImageOptions);
 
@@ -242,7 +248,7 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
             viewHolder.videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    viewHolder.videoView.stopPlayback();
+                    viewHolder.videoView.pause();
                     viewHolder.layout_bottom.setVisibility(View.VISIBLE);
                     viewHolder.iv_player.setVisibility(View.VISIBLE);
                     viewHolder.iv_video.setVisibility(View.VISIBLE);
@@ -267,18 +273,26 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
                             viewHolder.iv_video.setVisibility(View.GONE);
                             viewHolder.videoView.start();
                         }
-                    }else{//其他的
-                        if(mHolder!=null&&mHolder.videoView.isPlaying()){
-                            mHolder.videoView.stopPlayback();
+                    }else{
+                        if(mHolder!=null&&mHolder.videoView.isPlaying()){//其他的正在播放
+                            mHolder.videoView.pause();
                             mHolder.layout_bottom.setVisibility(View.VISIBLE);
                             mHolder.iv_player.setVisibility(View.VISIBLE);
                             mHolder.iv_video.setVisibility(View.VISIBLE);
                         }
-                        mHolder=viewHolder;
-                        viewHolder.layout_bottom.setVisibility(View.GONE);
-                        viewHolder.iv_player.setVisibility(View.GONE);
-                        viewHolder.iv_video.setVisibility(View.GONE);
-                        viewHolder.videoView.start();
+                        //播放视频
+                        if(viewHolder.videoView.isPlaying()) {
+                            viewHolder.videoView.pause();
+                            viewHolder.layout_bottom.setVisibility(View.VISIBLE);
+                            viewHolder.iv_player.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            mHolder=viewHolder;
+                            viewHolder.layout_bottom.setVisibility(View.GONE);
+                            viewHolder.iv_player.setVisibility(View.GONE);
+                            viewHolder.iv_video.setVisibility(View.GONE);
+                            viewHolder.videoView.start();
+                        }
                     }
                 }
             });

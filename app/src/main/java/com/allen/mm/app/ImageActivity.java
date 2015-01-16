@@ -2,6 +2,7 @@ package com.allen.mm.app;
 
 import android.app.Activity;
 import android.app.WallpaperManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -13,6 +14,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
+import com.allen.mm.app.model.Model;
+import com.allen.mm.app.utils.Utils;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -140,7 +143,13 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
                 break;
             case R.id.action_wall:
                 //设置壁纸：
-                setWallpaper();
+                Utils.showDialog(this, "是否设为壁纸", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        setWallpaper();
+                    }
+                },null);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -197,6 +206,6 @@ public class ImageActivity extends Activity implements PhotoViewAttacher.OnPhoto
 //        set.setInterpolator(new AccelerateInterpolator());
 //        set.setDuration(200).start();
         super.onBackPressed();
-        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
+        overridePendingTransition(0,android.R.anim.slide_out_right);
     }
 }
