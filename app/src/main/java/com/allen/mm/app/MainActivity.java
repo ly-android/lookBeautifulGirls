@@ -1,27 +1,27 @@
 package com.allen.mm.app;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import com.allen.mm.app.fragment.GifFragment;
 import com.allen.mm.app.fragment.MMFragment;
 import com.allen.mm.app.fragment.VideoFragment;
+import com.allen.mm.app.utils.ClientFactory;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends BaseActivity {
 
     static final String TAB_MM="tab_mm";
     static final String TAB_SEX="tab_sex";
@@ -34,6 +34,7 @@ public class MainActivity extends FragmentActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerArrowDrawable drawerArrow;
     private boolean drawerArrowColor;
+
     String[] values = new String[]{
             "美女",
             "性感",
@@ -42,6 +43,10 @@ public class MainActivity extends FragmentActivity {
             "视频"
     };
     MenuAdapter menuAdapter;
+    LinearLayout right_menu;
+    TextView tv_change_skin;
+    AlertDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,12 +56,21 @@ public class MainActivity extends FragmentActivity {
 //        getSupportActionBar().setIcon(R.drawable.ic_launcher);
         getActionBar().setHomeButtonEnabled(true);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        setContentView(R.layout.activity_main);
 
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
-
+        right_menu= (LinearLayout) findViewById(R.id.right_menu);
+        tv_change_skin= (TextView) findViewById(R.id.tv_change_skin);
+        tv_change_skin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (dialog!=null){
+                    dialog.show();
+                }else
+                    dialog=showItems();
+            }
+        });
 
         drawerArrow = new DrawerArrowDrawable(this) {
             @Override
@@ -78,6 +92,8 @@ public class MainActivity extends FragmentActivity {
                 invalidateOptionsMenu();
             }
         };
+        mDrawerToggle.setDrawerLeftView(mDrawerList);
+        mDrawerToggle.setDrawerRightView(right_menu);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
@@ -111,6 +127,30 @@ public class MainActivity extends FragmentActivity {
         });
         show(0,TAB_MM,MMFragment.instance(MMFragment.TAB_MM));
     }
+
+
+    private AlertDialog showItems(){
+        AlertDialog dialog=new AlertDialog.Builder(this).setTitle("选择主题").setItems(skins, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, final int which) {
+                ClientFactory.notifyClients(IThemeUpdateListener.class, new ClientFactory.IClientCall<IThemeUpdateListener>() {
+                    @Override
+                    public void onCall(IThemeUpdateListener obj) {
+                        obj.update(which);
+                    }
+                });
+            }
+        }).create();
+        dialog.show();
+        return dialog;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_layout,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
     Fragment currFragment;
     private void show(int position,String tag,BaseFragment showFragment){
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -142,6 +182,11 @@ public class MainActivity extends FragmentActivity {
             } else {
                 mDrawerLayout.openDrawer(mDrawerList);
             }
+        }else if(item.getItemId()==R.id.action_setting){
+            if(mDrawerLayout.isDrawerOpen(right_menu))
+                mDrawerLayout.closeDrawer(right_menu);
+            else
+                mDrawerLayout.openDrawer(right_menu);
         }
         return super.onOptionsItemSelected(item);
     }

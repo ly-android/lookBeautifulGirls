@@ -7,4 +7,10 @@
     <color name="actionbar_color">#FF82AB</color>
     <color name="ldrawer_color">#FFFFFF</color>
     <color name="drawer_arrow_second_color">#303f9f</color>
+
+    <color name="skin_fenhong">#FF82AB</color>
+    <color name="skin_danlan">#7EC0EE</color>
+    <color name="skin_yahei">#303030</color>
+    <color name="skin_juhuang">#EE9A00</color>
+    <color name="skin_shenzi">#E066FF</color>
 </resources>

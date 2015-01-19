@@ -29,6 +29,9 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
     protected DrawerArrowDrawable mDrawerImage;
     protected boolean animateEnabled;
 
+    protected boolean drawerToggleLeft=true,drawerToggleRight=false;
+    protected View drawerLeftView,drawerRightView;
+
     public ActionBarDrawerToggle(Activity activity, DrawerLayout drawerLayout, int drawerImageRes, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
         super(activity, drawerLayout, drawerImageRes, openDrawerContentDescRes, closeDrawerContentDescRes);
     }
@@ -49,10 +52,18 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
             return;
         }
         if (animateEnabled) {
-            if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-                mDrawerImage.setProgress(1.f);
-            } else {
-                mDrawerImage.setProgress(0.f);
+            if(isDrawerToggleLeft()&&drawerLeftView!=null){
+                if (mDrawerLayout.isDrawerOpen(drawerLeftView)) {
+                    mDrawerImage.setProgress(1.f);
+                } else {
+                    mDrawerImage.setProgress(0.f);
+                }
+            }else if(isDrawerToggleRight()&&drawerRightView!=null){
+                if (mDrawerLayout.isDrawerOpen(drawerRightView)) {
+                    mDrawerImage.setProgress(1.f);
+                } else {
+                    mDrawerImage.setProgress(0.f);
+                }
             }
         }
         setActionBarUpIndicator();
@@ -95,7 +106,19 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
         }
         if (animateEnabled) {
             mDrawerImage.setVerticalMirror(!mDrawerLayout.isDrawerOpen(GravityCompat.START));
-            mDrawerImage.setProgress(slideOffset);
+            if(drawerView==drawerLeftView){
+//                Log.w("ly","drawer left");
+                if(isDrawerToggleLeft())
+                {
+                    mDrawerImage.setProgress(slideOffset);
+                }
+            }else if(drawerView==drawerRightView){
+//                Log.w("ly","drawer left");
+                if(isDrawerToggleRight())
+                {
+                    mDrawerImage.setProgress(slideOffset);
+                }
+            }
         }
     }
 
@@ -106,7 +129,17 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
             return;
         }
         if (animateEnabled) {
-            mDrawerImage.setProgress(1.f);
+            if(drawerView==drawerLeftView){
+                if(isDrawerToggleLeft())
+                {
+                    mDrawerImage.setProgress(1.f);
+                }
+            }else if(drawerView==drawerRightView){
+                if(isDrawerToggleRight())
+                {
+                    mDrawerImage.setProgress(1.f);
+                }
+            }
         }
         setActionBarDescription();
     }
@@ -118,7 +151,17 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
             return;
         }
         if (animateEnabled) {
-            mDrawerImage.setProgress(0.f);
+            if(drawerView==drawerLeftView){
+                if(isDrawerToggleLeft())
+                {
+                    mDrawerImage.setProgress(0.f);
+                }
+            }else if(drawerView==drawerRightView){
+                if(isDrawerToggleRight())
+                {
+                    mDrawerImage.setProgress(0.f);
+                }
+            }
         }
         setActionBarDescription();
     }
@@ -180,4 +223,32 @@ public class ActionBarDrawerToggle extends android.support.v4.app.ActionBarDrawe
         return this.animateEnabled;
     }
 
+    public void setActionBarDrawerToggleEnable(boolean left,boolean right){
+        drawerToggleLeft=left;
+        drawerToggleRight=right;
+    }
+
+    public boolean isDrawerToggleLeft() {
+        return drawerToggleLeft;
+    }
+
+    public boolean isDrawerToggleRight() {
+        return drawerToggleRight;
+    }
+
+    public void setDrawerLeftView(View drawerLeftView) {
+        this.drawerLeftView = drawerLeftView;
+    }
+
+    public void setDrawerRightView(View drawerRightView) {
+        this.drawerRightView = drawerRightView;
+    }
+
+    public View getDrawerLeftView() {
+        return drawerLeftView;
+    }
+
+    public View getDrawerRightView() {
+        return drawerRightView;
+    }
 }

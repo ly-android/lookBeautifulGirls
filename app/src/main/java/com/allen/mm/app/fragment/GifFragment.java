@@ -49,6 +49,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
     int pageSize=20;
     AsyncHttpClient httpClient;
     ArrayList<GifModel> list;
+    GifAdapter gifAdapter;
 
     public static GifFragment instance(){
         return new GifFragment();
@@ -83,7 +84,8 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
         recyclerView.setLayoutManager(linearLayoutManager);
         layout.setOnRefreshListener(this);
         layout.setRefreshStyle(PullRefreshLayout.STYLE_MATERIAL);
-        recyclerView.setAdapter(new GifAdapter());
+        gifAdapter = new GifAdapter();
+        recyclerView.setAdapter(gifAdapter);
         recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -112,6 +114,14 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                if (gifAdapter.mHolder != null)
+                    if (linearLayoutManager.findFirstVisibleItemPosition() > gifAdapter.mHolder.pos || gifAdapter.mHolder.pos > linearLayoutManager.findLastVisibleItemPosition()) {
+                        if (gifAdapter.mHolder.iv.getDrawable() instanceof GifDrawable) {
+                            GifDrawable drawable = (GifDrawable) gifAdapter.mHolder.iv.getDrawable();
+                            if (drawable.isPlaying())
+                                drawable.stop();
+                        }
+                    }
             }
         });
         return view;
@@ -195,44 +205,49 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
              }
          });
     }
-    class GifAdapter extends RecyclerView.Adapter<GifAdapter.Holder>{
-        byte[] intentBytes=null;
+
+    class GifAdapter extends RecyclerView.Adapter<GifAdapter.Holder> {
+
+        byte[] intentBytes = null;
+        GifAdapter.Holder mHolder;
+
         @Override
         public GifAdapter.Holder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            return new Holder(LayoutInflater.from(getActivity()).inflate(R.layout.card_layout,viewGroup,false));
+            return new Holder(LayoutInflater.from(getActivity()).inflate(R.layout.card_layout, viewGroup, false));
         }
 
         @Override
         public void onBindViewHolder(final GifAdapter.Holder viewHolder, int i) {
-            final GifModel model=list.get(i);
+            final GifModel model = list.get(i);
             viewHolder.tv.setText(model.text);
-            LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-            int w=width- Utils.dip2px(getActivity(), 30);
-            params.height=w*model.height/model.width;
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) viewHolder.iv.getLayoutParams();
+            int w = width - Utils.dip2px(getActivity(), 30);
+            params.height = w * model.height / model.width;
             viewHolder.iv.setLayoutParams(params);
-            String imagUrl=null;
-
-            if(model.is_gif==0){
-                imagUrl= TextUtils.isEmpty(model.image0)?model.image1:model.image2;
-                ImageLoader.getInstance().displayImage(imagUrl,viewHolder.iv,displayImageOptions);
-            }
-            else{
-                imagUrl=model.gifFistFrame;
+            String imagUrl = null;
+            viewHolder.pos = i;
+            if (model.is_gif == 0) {
+                imagUrl = TextUtils.isEmpty(model.image0) ? model.image1 : model.image2;
+                ImageLoader.getInstance().displayImage(imagUrl, viewHolder.iv, displayImageOptions);
+            } else {
+                imagUrl = model.gifFistFrame;
 //                viewHolder.iv.startAnimation();
                 httpClient.get(getActivity(), model.image0, new BinaryHttpResponseHandler() {
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] bytes) {
-                         if(bytes!=null){
-                             intentBytes=bytes;
-                             try {
-                                 GifDrawable gifDrawable=new GifDrawable(bytes);
-                                 if(gifDrawable!=null)
-                                     viewHolder.iv.setImageDrawable(gifDrawable);
-                                 gifDrawable.start();
-                             } catch (Exception e) {
-                                 e.printStackTrace();
-                             }
-                         }
+                        if (bytes != null) {
+                            intentBytes = bytes;
+                            try {
+                                mHolder = viewHolder;
+                                GifDrawable gifDrawable = new GifDrawable(bytes);
+                                if (gifDrawable != null) {
+                                    viewHolder.iv.setImageDrawable(gifDrawable);
+                                    gifDrawable.start();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     @Override
@@ -249,22 +264,22 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Log.d("ly","onClick--model.is_gif="+model.is_gif);
                     int[] location = new int[2];
                     v.getLocationOnScreen(location);
                     int x = location[0];
                     int y = location[1];
-                    Intent intent=null;
-                    if(model.is_gif==0){
-                        intent=new Intent(getActivity(),ImageActivity.class);
-                        Model model1=new Model();
-                        model1.image_url=model.image0;
-                        intent.putExtra("model",(Parcelable)model1);
-                    }else{
-                        intent=new Intent(getActivity(),GifActivity.class);
-                        intent.putExtra("url",model.image0);
-                        intent.putExtra("byte",intentBytes);
+                    Intent intent = null;
+                    if (model.is_gif == 0) {
+                        intent = new Intent(getActivity(), ImageActivity.class);
+                        Model model1 = new Model();
+                        model1.image_url = model.image0;
+                        intent.putExtra("model", (Parcelable) model1);
+                    } else {
+                        intent = new Intent(getActivity(), GifActivity.class);
+                        intent.putExtra("url", model.image0);
                     }
-                    ActivityOptionsCompat optionsCompat=ActivityOptionsCompat.makeScaleUpAnimation(v, x/2,y/2,v.getWidth(),v.getHeight());
+                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeScaleUpAnimation(v, x / 2, y / 2, v.getWidth(), v.getHeight());
                     ActivityCompat.startActivity(getActivity(), intent, optionsCompat.toBundle());
                 }
             });
@@ -274,15 +289,17 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
         public int getItemCount() {
             return list.size();
         }
-        class Holder extends RecyclerView.ViewHolder{
+
+        class Holder extends RecyclerView.ViewHolder {
 
             GifImageView iv;
             TextView tv;
+            int pos;
 
             public Holder(View itemView) {
                 super(itemView);
-                iv= (GifImageView) itemView.findViewById(R.id.iv_card);
-                tv= (TextView) itemView.findViewById(R.id.tv_title);
+                iv = (GifImageView) itemView.findViewById(R.id.iv_card);
+                tv = (TextView) itemView.findViewById(R.id.tv_title);
             }
         }
     }
