@@ -17,6 +17,7 @@ public class Utils {
         AlertDialog dialog=null;
         AlertDialog.Builder builder=new AlertDialog.Builder(context);
         dialog=builder.setMessage(message).setPositiveButton("确定", okListener).setNegativeButton("取消",cancelListener).create();
+        dialog.show();
         return dialog;
     }
 
