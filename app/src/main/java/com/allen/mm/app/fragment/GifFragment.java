@@ -18,6 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.allen.mm.app.*;
+import com.allen.mm.app.model.GifModel;
+import com.allen.mm.app.model.Model;
+import com.allen.mm.app.utils.Utils;
 import com.baoyz.widget.PullRefreshLayout;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
@@ -204,7 +207,7 @@ public class GifFragment extends BaseFragment implements PullRefreshLayout.OnRef
             final GifModel model=list.get(i);
             viewHolder.tv.setText(model.text);
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.iv.getLayoutParams();
-            int w=width-Utils.dip2px(getActivity(),30);
+            int w=width- Utils.dip2px(getActivity(), 30);
             params.height=w*model.height/model.width;
             viewHolder.iv.setLayoutParams(params);
             String imagUrl=null;

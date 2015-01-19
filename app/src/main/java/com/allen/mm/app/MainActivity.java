@@ -91,78 +91,41 @@ public class MainActivity extends FragmentActivity {
                     case 0:
 //                        mDrawerToggle.setAnimateEnabled(false);
 //                        drawerArrow.setProgress(1f);
-                        show(0);
+                        show(0,TAB_MM,MMFragment.instance(MMFragment.TAB_MM));
                         break;
                     case 1:
-                        show(1);
+                        show(1,TAB_SEX,MMFragment.instance(MMFragment.TAB_XG));
                         break;
                     case 2:
-                        show(2);
+                        show(2,TAB_SIWA,MMFragment.instance(MMFragment.TAB_SW));
                         break;
                     case 3:
-                        show(3);
+                        show(3,TAB_DZ,GifFragment.instance());
                         break;
                     case 4:
-                        show(4);
+                        show(4,TAB_SP,VideoFragment.instance());
                         break;
                 }
 
             }
         });
-        show(0);
+        show(0,TAB_MM,MMFragment.instance(MMFragment.TAB_MM));
     }
     Fragment currFragment;
-    private void show(int position){
+    private void show(int position,String tag,BaseFragment showFragment){
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         Fragment fragment=null;
-        if(currFragment!=null)
+        if(currFragment!=null){
+            currFragment.onPause();
             transaction.hide(currFragment);
-        switch (position){
-            case 0:
-                fragment=getSupportFragmentManager().findFragmentByTag(TAB_MM);
-                if(fragment!=null){
-                    transaction.show(fragment);
-                }else{
-                    fragment= MMFragment.instance(MMFragment.TAB_MM);
-                    transaction.add(R.id.container,fragment,TAB_MM);
-                }
-                break;
-            case 1:
-                fragment=getSupportFragmentManager().findFragmentByTag(TAB_SEX);
-                if(fragment!=null){
-                    transaction.show(fragment);
-                }else{
-                    fragment= MMFragment.instance(MMFragment.TAB_XG);
-                    transaction.add(R.id.container,fragment,TAB_SEX);
-                }
-                break;
-            case 2:
-                fragment=getSupportFragmentManager().findFragmentByTag(TAB_SIWA);
-                if(fragment!=null){
-                    transaction.show(fragment);
-                }else{
-                    fragment= MMFragment.instance(MMFragment.TAB_SW);
-                    transaction.add(R.id.container,fragment,TAB_SIWA);
-                }
-                break;
-            case 3:
-                fragment=getSupportFragmentManager().findFragmentByTag(TAB_DZ);
-                if(fragment!=null){
-                    transaction.show(fragment);
-                }else{
-                    fragment= GifFragment.instance();
-                    transaction.add(R.id.container,fragment,TAB_DZ);
-                }
-                break;
-            case 4:
-                fragment=getSupportFragmentManager().findFragmentByTag(TAB_SP);
-                if(fragment!=null){
-                    transaction.show(fragment);
-                }else{
-                    fragment= VideoFragment.instance();
-                    transaction.add(R.id.container,fragment,TAB_SP);
-                }
-                break;
+        }
+        fragment=getSupportFragmentManager().findFragmentByTag(tag);
+        if(fragment!=null){
+            transaction.show(fragment);
+            fragment.onResume();
+        }else{
+            fragment= showFragment;
+            transaction.add(R.id.container,fragment,tag);
         }
         transaction.commitAllowingStateLoss();
         currFragment=fragment;

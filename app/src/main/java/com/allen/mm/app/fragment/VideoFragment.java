@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.allen.mm.app.*;
+import com.allen.mm.app.model.VideoModel;
+import com.allen.mm.app.utils.Utils;
 import com.baoyz.widget.PullRefreshLayout;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -116,6 +118,25 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
         });
         return rootView;
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (videoAdapter.mHolder != null) {
+            //  Log.d("ly","videoAdapter.mHolder!=null,+findFirstVisibleItemPosition="+linearLayoutManager.findFirstVisibleItemPosition()+",videoAdapter.mHolder.position="+videoAdapter.mHolder.position);
+            Log.d("ly","onScrolled--"+videoAdapter.mHolder.position);
+            videoAdapter.mHolder.videoView.stopPlayback();
+            videoAdapter.mHolder.layout_bottom.setVisibility(View.VISIBLE);
+            videoAdapter.mHolder.iv_player.setVisibility(View.VISIBLE);
+            videoAdapter.mHolder.iv_video.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -225,7 +246,7 @@ public class VideoFragment extends BaseFragment implements PullRefreshLayout.OnR
             viewHolder.tv_time.setText(getTime(model.videotime));
 
             LinearLayout.LayoutParams params= (LinearLayout.LayoutParams) viewHolder.layout_video.getLayoutParams();
-            int w=width-Utils.dip2px(getActivity(),30);
+            int w=width- Utils.dip2px(getActivity(), 30);
             params.height=w*model.height/model.width;
             viewHolder.layout_video.setLayoutParams(params);
 
